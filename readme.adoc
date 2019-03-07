@@ -1,0 +1,128 @@
+== Prerequisites
+Network of at least 3 Redhat enterprise Linux 7.
+
+==== Additional installs
+Install using yum:
+----
+yum install java-1.8.0-openjdk-devel nmap-ncat dump
+----
+
+== Multi-node instructions
+
+NOTE: for the purpsoe of these instructions the nodes documented are `192.168.1.19, 192.168.1.21, 192.168.1.22`.  These need to be adusted for your environment
+
+* https://access.redhat.com/documentation/en-us/red_hat_amq/7.2/html-single/using_amq_streams_on_red_hat_enterprise_linux_rhel/#proc-installing-amq-streams-str[Installing AMQ Streams]
+* https://access.redhat.com/documentation/en-us/red_hat_amq/7.2/html-single/using_amq_streams_on_red_hat_enterprise_linux_rhel/#proc-running-multinode-zookeeper-cluster-str[Running multi-node Zookeeper cluster]
+
+* https://access.redhat.com/documentation/en-us/red_hat_amq/7.2/html-single/using_amq_streams_on_red_hat_enterprise_linux_rhel/#proc-running-multinode-kafka-cluster-str[Running a multi-node Kafka cluster]
+
+Unique files per node
+`/opt/kafka/config/server.properties` - id
+`/var/lib/zookeeper/myid`
+
+=== Starting
+----
+su - kafka
+/opt/kafka/bin/zookeeper-server-start.sh -daemon /opt/kafka/config/zookeeper.properties
+
+/opt/kafka/bin/kafka-server-start.sh -daemon /opt/kafka/config/server.properties
+----
+
+=== Verifing
+
+zookeeper:
+----
+jcmd | grep zookeeper
+echo stat | ncat localhost 2181
+tail -f /opt/kafka/logs/server.log
+----
+
+Kafka:
+----
+jcmd | grep Kafka
+echo dump | ncat 192.168.1.19 2181
+tail -f /opt/kafka/logs/kafkaServer.out
+----
+
+=== Commandline usage
+Producer:
+----
+/opt/kafka/bin/kafka-console-producer.sh --broker-list 192.168.1.19:9092,192.168.1.21:9092,192.168.1.22:9092 --topic test-topic
+----
+
+Consumer:
+----
+/opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server 192.168.1.19:9092,192.168.1.21:9092,192.168.1.22:9092 --topic test-topic --from-beginning
+----
+
+=== Stopping
+----
+/opt/kafka/bin/kafka-server-stop.sh
+/opt/kafka/bin/zookeeper-server-stop.sh
+----
+
+== Topics
+
+=== Creating
+----
+/opt/kafka/bin/kafka-topics.sh --create --zookeeper 192.168.1.19:2181 --replication-factor 2 --partitions 2 --topic lines
+----
+
+=== Describe
+----
+/opt/kafka/bin/kafka-topics.sh --describe --zookeeper 192.168.1.19:2181 --topic lines
+----
+
+=== Alter partitions
+----
+/opt/kafka/bin/kafka-topics.sh --alter --zookeeper 192.168.1.19:2181 --partitions 10 --topic lines 
+----
+
+=== Add configuration
+----
+/opt/kafka/bin/kafka-configs.sh --zookeeper 192.168.1.19:2181 --entity-type topics --entity-name lines --alter --add-config max.message.bytes=128000 retention.ms=86400000 partitions=20
+----
+
+===  Complete command
+----
+
+/opt/kafka/bin/kafka-topics.sh --create --zookeeper 192.168.1.19:2181 --replication-factor 2 --partitions 10 --topic lines-2 --config max.message.bytes=128000 -config retention.ms=86400000
+----
+
+== Clients
+
+=== Create a producer
+----
+java -Dcamel.component.kafka.configuration.brokers=192.168.1.19:9092,192.168.1.21:9092,192.168.1.22:9092 -jar clients/time-producer.jar
+----
+
+=== Create a consumer
+----
+java -Dserver.port=8050 -Dcamel.component.kafka.configuration.brokers=192.168.1.19:9092,192.168.1.21:9092,192.168.1.22:9092 -Dcamel.component.kafka.configuration.group.id=log-consumer-grp -jar clients/log-consumer.jar
+----
+
+== Monitoring
+
+Before starting kafka set the following environment variable
+
+----
+export JMX_PORT=9999
+----
+
+WARNING: Setting this globally can cause issues as both kafka and zookeeper will try to bind to the port.
+
+
+CAUTION: In some cases you node may not resolve its host name properly. You can test this using `hostname -i`.  If this is the case use: 
+
+----
+export KAFKA_JMX_OPTS="-Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=192.168.1.22"
+----
+
+Using a computer with graphics and the JDK installed run `jconsole` command. Enter the url of the configure kafka server.
+
+
+TIP: after starting the kafk node you can reset the environment variable using
+`unset KAFKA_JMX_OPTS`
+
+
+
