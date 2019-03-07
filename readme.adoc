@@ -1,5 +1,5 @@
 == Prerequisites
-Network of at least 3 Redhat enterprise Linux 7.
+Network of at least 3 Redhat Enterprise Linux 7.
 
 ==== Additional installs
 Install using yum:
@@ -9,7 +9,7 @@ yum install java-1.8.0-openjdk-devel nmap-ncat dump
 
 == Multi-node instructions
 
-NOTE: for the purpsoe of these instructions the nodes documented are `192.168.1.19, 192.168.1.21, 192.168.1.22`.  These need to be adusted for your environment
+NOTE: for the purpose of these instructions the nodes documented are `192.168.1.19, 192.168.1.21, 192.168.1.22`.  These need to be adusted for your environment
 
 * https://access.redhat.com/documentation/en-us/red_hat_amq/7.2/html-single/using_amq_streams_on_red_hat_enterprise_linux_rhel/#proc-installing-amq-streams-str[Installing AMQ Streams]
 * https://access.redhat.com/documentation/en-us/red_hat_amq/7.2/html-single/using_amq_streams_on_red_hat_enterprise_linux_rhel/#proc-running-multinode-zookeeper-cluster-str[Running multi-node Zookeeper cluster]
