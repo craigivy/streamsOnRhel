@@ -101,6 +101,8 @@ java -Dcamel.component.kafka.configuration.brokers=192.168.1.19:9092,192.168.1.2
 java -Dserver.port=8050 -Dcamel.component.kafka.configuration.brokers=192.168.1.19:9092,192.168.1.21:9092,192.168.1.22:9092 -Dcamel.component.kafka.configuration.group.id=log-consumer-grp -jar clients/log-consumer.jar
 ----
 
+NOTE: The source code to the clients can be found on https://github.com/RedHatWorkshops/workshop-amq-streams/tree/master/apps[github]
+
 == Monitoring
 
 Before starting kafka set the following environment variable
