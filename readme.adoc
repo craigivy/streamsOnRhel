@@ -17,8 +17,8 @@ NOTE: for the purpose of these instructions the nodes documented are `192.168.1.
 * https://access.redhat.com/documentation/en-us/red_hat_amq/7.2/html-single/using_amq_streams_on_red_hat_enterprise_linux_rhel/#proc-running-multinode-kafka-cluster-str[Running a multi-node Kafka cluster]
 
 Unique files per node
-`/opt/kafka/config/server.properties` - id
-`/var/lib/zookeeper/myid`
+* `/opt/kafka/config/server.properties` - don't for get the id
+* `/var/lib/zookeeper/myid`
 
 === Starting
 ----
